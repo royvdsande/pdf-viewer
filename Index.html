@@ -6,19 +6,20 @@
   <title>PDF Viewer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.min.js" integrity="sha512-uFISShWt3W6u0FpXR5yfmbJO/KbxaooAZl3nHCAsHNtkmqyutJkxE7d8Ooym23UqUbJ6bD9FOb6MZH4/6jiVkQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <style>
     :root {
       color-scheme: light;
-      --bg: #0f1115;
-      --card: #1a1d24;
-      --accent: #6ad0ff;
-      --accent-strong: #4cb5ff;
-      --text: #eef2f7;
-      --muted: #9da6b6;
-      --border: #272b35;
-      --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --accent: #2d7ff9;
+      --accent-soft: #e9f1ff;
+      --text: #0f172a;
+      --muted: #4b5563;
+      --border: #e5e7eb;
+      --shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+      --accent-strong: #1a64d9;
     }
 
     * {
@@ -28,9 +29,7 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background: radial-gradient(circle at 20% 20%, rgba(106, 208, 255, 0.08), transparent 28%),
-        radial-gradient(circle at 80% 0%, rgba(255, 255, 255, 0.04), transparent 26%),
-        var(--bg);
+      background: var(--bg);
       color: var(--text);
       font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
@@ -39,10 +38,9 @@
       position: sticky;
       top: 0;
       z-index: 10;
-      backdrop-filter: blur(10px);
-      background: color-mix(in srgb, var(--bg) 85%, transparent);
+      background: rgba(255, 255, 255, 0.92);
       border-bottom: 1px solid var(--border);
-      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
     }
 
     .app-shell {
@@ -55,15 +53,14 @@
     }
 
     .toolbar {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
       align-items: center;
-      justify-content: space-between;
-      padding: 14px 16px;
+      padding: 12px 14px;
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 18px;
+      border-radius: 14px;
       box-shadow: var(--shadow);
     }
 
@@ -77,16 +74,23 @@
 
     .brand span {
       padding: 6px 12px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-      color: #0b1824;
-      border-radius: 12px;
-      font-size: 14px;
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+      border-radius: 10px;
+      font-size: 13px;
       text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 2px;
     }
 
     .controls {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
       align-items: center;
       justify-content: flex-end;
@@ -96,37 +100,44 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 10px 12px;
+      padding: 9px 12px;
       font-weight: 600;
       color: var(--text);
-      background: linear-gradient(135deg, #252a33, #1c2028);
+      background: #f3f4f6;
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 10px;
       cursor: pointer;
-      transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
-      box-shadow: var(--shadow);
+      transition: transform 0.12s ease, border-color 0.12s ease, background-color 0.12s ease;
+      box-shadow: none;
       user-select: none;
     }
 
     .btn:hover, label.file-picker:hover {
       transform: translateY(-1px);
       border-color: var(--accent);
-      box-shadow: 0 10px 25px rgba(106, 208, 255, 0.18);
-    }
-
-    .btn:active, label.file-picker:active {
-      transform: translateY(0);
+      background: #eef2ff;
     }
 
     .btn.secondary {
-      background: #12151c;
+      background: #f8fafc;
     }
 
     .btn[disabled] {
-      opacity: 0.5;
+      opacity: 0.45;
       cursor: not-allowed;
-      box-shadow: none;
       border-color: var(--border);
+    }
+
+    label.file-picker {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      box-shadow: 0 10px 18px rgba(45, 127, 249, 0.25);
+    }
+
+    label.file-picker:hover {
+      background: var(--accent-strong);
+      border-color: var(--accent-strong);
     }
 
     input[type="file"] {
@@ -134,10 +145,10 @@
     }
 
     .pill {
-      padding: 8px 12px;
-      background: #13161e;
+      padding: 7px 10px;
+      background: #f8fafc;
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 10px;
       color: var(--muted);
       font-size: 14px;
       display: inline-flex;
@@ -146,8 +157,8 @@
     }
 
     .viewer-shell {
-      background: color-mix(in srgb, var(--card) 92%, rgba(255, 255, 255, 0.02));
-      border-radius: 18px;
+      background: var(--card);
+      border-radius: 14px;
       border: 1px solid var(--border);
       padding: 14px;
       box-shadow: var(--shadow);
@@ -156,8 +167,8 @@
     #viewer {
       display: flex;
       flex-direction: column;
-      gap: 18px;
-      max-height: calc(100vh - 190px);
+      gap: 14px;
+      max-height: calc(100vh - 210px);
       overflow-y: auto;
       scroll-behavior: smooth;
       padding: 6px;
@@ -165,11 +176,11 @@
 
     .page {
       position: relative;
-      background: #f8f9fb;
-      border-radius: 16px;
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+      background: #f8fafc;
+      border-radius: 12px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
       overflow: hidden;
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(15, 23, 42, 0.06);
     }
 
     canvas.page-canvas {
@@ -202,25 +213,81 @@
       background: rgba(30, 144, 255, 0.35);
     }
 
+    .drawingLayer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      touch-action: none;
+    }
+
+    .drawingLayer.active {
+      pointer-events: auto;
+      cursor: crosshair;
+    }
+
+    .draw-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .color-swatch {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+    }
+
+    .color-swatch[aria-pressed="true"] {
+      border-color: var(--text);
+    }
+
+    .range {
+      appearance: none;
+      height: 6px;
+      border-radius: 10px;
+      background: #e5e7eb;
+      outline: none;
+    }
+
+    .range::-webkit-slider-thumb {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid #fff;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+      cursor: pointer;
+    }
+
+    .range::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid #fff;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+      cursor: pointer;
+    }
+
     .empty-state {
       text-align: center;
       color: var(--muted);
       padding: 30px 0 14px;
     }
 
-    .hint {
-      color: var(--muted);
-      font-size: 14px;
-      margin-top: 6px;
-    }
-
     @media (max-width: 720px) {
       .toolbar {
-        gap: 12px;
+        grid-template-columns: 1fr;
       }
       .controls {
-        justify-content: space-between;
-        width: 100%;
+        justify-content: flex-start;
       }
       #viewer {
         max-height: unset;
@@ -236,8 +303,8 @@
         <div class="brand" aria-label="Viewer title">
           <span>PDF</span>
           <div>
-            <div style="font-size: 16px;">High fidelity viewer</div>
-            <div class="hint">Selecteer een lokaal bestand om te starten</div>
+            <div style="font-size: 16px;">Viewer</div>
+            <div class="hint">Upload een PDF en blader, zoom of teken.</div>
           </div>
         </div>
         <div class="controls" aria-label="Viewer controls">
@@ -260,8 +327,22 @@
 
   <main class="app-shell">
     <section class="viewer-shell" aria-live="polite">
+      <div class="draw-controls" aria-label="Teken opties">
+        <button class="btn" id="toggle-draw" aria-pressed="false">✏️ Tekenen uit</button>
+        <div aria-label="Kleuren" style="display: flex; gap: 6px; align-items: center;">
+          <button class="color-swatch" data-color="#1a64d9" aria-pressed="true" style="background:#1a64d9"></button>
+          <button class="color-swatch" data-color="#ef4444" aria-pressed="false" style="background:#ef4444"></button>
+          <button class="color-swatch" data-color="#10b981" aria-pressed="false" style="background:#10b981"></button>
+          <button class="color-swatch" data-color="#111827" aria-pressed="false" style="background:#111827"></button>
+        </div>
+        <label style="display: inline-flex; align-items: center; gap: 6px; color: var(--muted);">
+          Dikte
+          <input type="range" id="stroke-width" min="1" max="12" value="3" class="range" />
+        </label>
+        <button class="btn secondary" id="clear-page" title="Wis tekeningen op pagina">Wissen</button>
+      </div>
       <div id="viewer" role="document" aria-label="PDF weergave">
-        <div class="empty-state" id="empty-state">Laad een PDF om te bekijken. Tekst selecteren en scrollen worden ondersteund.</div>
+        <div class="empty-state" id="empty-state">Laad een PDF om te bekijken. Tekst selecteren, tekenen en scrollen worden ondersteund.</div>
       </div>
     </section>
   </main>
@@ -278,6 +359,9 @@
     const resetBtn = document.getElementById('reset');
     const fitWidthBtn = document.getElementById('fit-width');
     const emptyState = document.getElementById('empty-state');
+    const toggleDrawBtn = document.getElementById('toggle-draw');
+    const strokeWidthInput = document.getElementById('stroke-width');
+    const clearPageBtn = document.getElementById('clear-page');
 
     const DPR = window.devicePixelRatio || 1;
     const MIN_SCALE = 0.75;
@@ -288,17 +372,28 @@
     let observer = null;
     let rendering = false;
 
+    const drawings = new Map();
+    const brush = {
+      enabled: false,
+      color: '#1a64d9',
+      size: 3,
+    };
+
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.worker.min.js';
 
     fileInput.addEventListener('change', async (event) => {
-      const [file] = event.target.files;
+      const [file] = event.target.files || [];
       if (!file) return;
-      const arrayBuffer = await file.arrayBuffer();
-      loadDocument(arrayBuffer);
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        loadDocument(arrayBuffer);
+      } catch (error) {
+        console.error('Fout bij lezen van bestand', error);
+      }
     });
 
     function setButtonsEnabled(enabled) {
-      [prevBtn, nextBtn, zoomInBtn, zoomOutBtn, resetBtn, fitWidthBtn].forEach(btn => {
+      [prevBtn, nextBtn, zoomInBtn, zoomOutBtn, resetBtn, fitWidthBtn, toggleDrawBtn, clearPageBtn].forEach(btn => {
         btn.disabled = !enabled;
       });
     }
@@ -311,10 +406,18 @@
       pageStatus.textContent = `Pagina ${Math.min(currentPage, total)} / ${total}`;
     }
 
+    function getPageDrawing(pageNumber) {
+      if (!drawings.has(pageNumber)) {
+        drawings.set(pageNumber, { strokes: [] });
+      }
+      return drawings.get(pageNumber);
+    }
+
     async function loadDocument(data) {
       try {
         setButtonsEnabled(false);
         currentPage = 1;
+        drawings.clear();
         emptyState?.remove();
         viewer.innerHTML = '';
         pdfDoc = await pdfjsLib.getDocument({ data }).promise;
@@ -325,6 +428,41 @@
         console.error(error);
         viewer.innerHTML = '<div class="empty-state">Kon het document niet laden. Probeer een ander PDF-bestand.</div>';
       }
+    }
+
+    function sizeCanvasForViewport(canvas, viewport) {
+      canvas.width = viewport.width * DPR;
+      canvas.height = viewport.height * DPR;
+      canvas.style.width = `${viewport.width}px`;
+      canvas.style.height = `${viewport.height}px`;
+    }
+
+    function drawStroke(ctx, stroke, width, height) {
+      if (!stroke.points.length) return;
+      ctx.strokeStyle = stroke.color;
+      ctx.lineWidth = stroke.size;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      stroke.points.forEach((point, index) => {
+        const x = point.x * width;
+        const y = point.y * height;
+        if (index === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      });
+      ctx.stroke();
+    }
+
+    function redrawLayer(canvas, pageNumber) {
+      const context = canvas.getContext('2d');
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      const width = canvas.width / DPR;
+      const height = canvas.height / DPR;
+      const { strokes } = getPageDrawing(pageNumber);
+      strokes.forEach(stroke => drawStroke(context, stroke, width, height));
     }
 
     async function renderDocument() {
@@ -361,7 +499,13 @@
 
       const textLayer = document.createElement('div');
       textLayer.className = 'textLayer';
-      container.append(canvas, textLayer);
+
+      const drawingLayer = document.createElement('canvas');
+      drawingLayer.className = 'drawingLayer';
+      sizeCanvasForViewport(drawingLayer, viewport);
+      redrawLayer(drawingLayer, pageNumber);
+
+      container.append(canvas, textLayer, drawingLayer);
 
       await renderTask.promise;
       const textContent = await page.getTextContent();
@@ -371,6 +515,8 @@
         viewport,
         textDivs: [],
       });
+
+      attachDrawingEvents(drawingLayer, pageNumber);
     }
 
     function clampScale(scale) {
@@ -401,6 +547,91 @@
       const page = document.querySelector(`.page[data-page-number="${pageNumber}"]`);
       if (page) {
         page.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function toggleDrawingMode() {
+      brush.enabled = !brush.enabled;
+      toggleDrawBtn.setAttribute('aria-pressed', String(brush.enabled));
+      toggleDrawBtn.textContent = brush.enabled ? '✏️ Tekenen aan' : '✏️ Tekenen uit';
+      document.querySelectorAll('.drawingLayer').forEach(layer => {
+        layer.classList.toggle('active', brush.enabled);
+      });
+    }
+
+    function selectColor(colorButton) {
+      document.querySelectorAll('.color-swatch').forEach(btn => btn.setAttribute('aria-pressed', 'false'));
+      colorButton.setAttribute('aria-pressed', 'true');
+      brush.color = colorButton.dataset.color;
+    }
+
+    function attachDrawingEvents(canvas, pageNumber) {
+      const ctx = canvas.getContext('2d');
+      let isDrawing = false;
+      let currentStroke = null;
+
+      const width = () => canvas.width / DPR;
+      const height = () => canvas.height / DPR;
+
+      function pointerToPoint(event) {
+        const rect = canvas.getBoundingClientRect();
+        const x = (event.clientX - rect.left) / rect.width;
+        const y = (event.clientY - rect.top) / rect.height;
+        return { x, y };
+      }
+
+      function startDraw(event) {
+        if (!brush.enabled) return;
+        isDrawing = true;
+        currentStroke = { color: brush.color, size: brush.size, points: [] };
+        canvas.setPointerCapture(event.pointerId);
+        addPoint(event);
+      }
+
+      function addPoint(event) {
+        if (!isDrawing || !currentStroke) return;
+        const point = pointerToPoint(event);
+        currentStroke.points.push(point);
+        ctx.strokeStyle = currentStroke.color;
+        ctx.lineWidth = currentStroke.size;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        const px = point.x * width();
+        const py = point.y * height();
+        if (currentStroke.points.length === 1) {
+          ctx.beginPath();
+          ctx.moveTo(px, py);
+        } else {
+          ctx.lineTo(px, py);
+          ctx.stroke();
+        }
+      }
+
+      function endDraw(event) {
+        if (!isDrawing || !currentStroke) return;
+        addPoint(event);
+        getPageDrawing(pageNumber).strokes.push(currentStroke);
+        currentStroke = null;
+        isDrawing = false;
+        canvas.releasePointerCapture(event.pointerId);
+      }
+
+      canvas.addEventListener('pointerdown', startDraw);
+      canvas.addEventListener('pointermove', addPoint);
+      canvas.addEventListener('pointerup', endDraw);
+      canvas.addEventListener('pointerleave', endDraw);
+      canvas.addEventListener('pointercancel', endDraw);
+
+      canvas.classList.toggle('active', brush.enabled);
+    }
+
+    function clearCurrentPageDrawings() {
+      if (!pdfDoc) return;
+      const { strokes } = getPageDrawing(currentPage);
+      strokes.length = 0;
+      const layer = document.querySelector(`.page[data-page-number="${currentPage}"] .drawingLayer`);
+      if (layer) {
+        redrawLayer(layer, currentPage);
       }
     }
 
@@ -446,6 +677,20 @@
         zoomOutBtn.click();
       }
     });
+
+    toggleDrawBtn.addEventListener('click', () => {
+      toggleDrawingMode();
+    });
+
+    document.querySelectorAll('.color-swatch').forEach(button => {
+      button.addEventListener('click', () => selectColor(button));
+    });
+
+    strokeWidthInput.addEventListener('input', (event) => {
+      brush.size = Number(event.target.value);
+    });
+
+    clearPageBtn.addEventListener('click', clearCurrentPageDrawings);
 
     updateZoomLabel();
     updatePageStatus();
