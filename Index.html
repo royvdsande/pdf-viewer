@@ -47,7 +47,7 @@
       display: flex;
       flex-direction: column;
       gap: 16px;
-      max-width: 1100px;
+      max-width: 1280px;
       margin: 0 auto;
       padding: 18px 14px 32px;
     }
@@ -156,12 +156,109 @@
       gap: 8px;
     }
 
+    .layout {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      align-items: stretch;
+      min-height: calc(100vh - 170px);
+    }
+
+    .sidebar {
+      position: relative;
+      background: var(--card);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: width 0.2s ease, min-width 0.2s ease;
+      min-width: 220px;
+      max-width: 480px;
+    }
+
+    .sidebar.collapsed {
+      width: 0;
+      min-width: 0;
+      border-width: 0;
+      padding: 0;
+      box-shadow: none;
+    }
+
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      background: #f8fafc;
+    }
+
+    .sidebar-body {
+      padding: 12px 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      height: 100%;
+    }
+
+    .sidebar-section {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .page-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(74px, 1fr));
+      gap: 8px;
+    }
+
+    .page-chip {
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #fff;
+      text-align: center;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s ease, transform 0.15s ease;
+    }
+
+    .page-chip:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .page-chip.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+    }
+
+    .sidebar-resizer {
+      position: absolute;
+      top: 0;
+      right: -6px;
+      width: 12px;
+      height: 100%;
+      cursor: col-resize;
+      touch-action: none;
+    }
+
     .viewer-shell {
       background: var(--card);
       border-radius: 14px;
       border: 1px solid var(--border);
       padding: 14px;
       box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 0;
     }
 
     #viewer {
@@ -233,6 +330,7 @@
       background: #f8fafc;
       border: 1px solid var(--border);
       border-radius: 10px;
+      flex-wrap: wrap;
     }
 
     .color-swatch {
@@ -276,6 +374,30 @@
       cursor: pointer;
     }
 
+    .tool-toggle {
+      display: inline-flex;
+      gap: 6px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 4px;
+    }
+
+    .tool-toggle button {
+      border: none;
+      background: transparent;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .tool-toggle button[aria-pressed="true"] {
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+    }
+
     .empty-state {
       text-align: center;
       color: var(--muted);
@@ -293,6 +415,16 @@
         max-height: unset;
         height: auto;
       }
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        position: relative;
+        max-width: none;
+      }
+      .sidebar.collapsed {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -308,6 +440,7 @@
           </div>
         </div>
         <div class="controls" aria-label="Viewer controls">
+          <button class="btn secondary" id="sidebar-toggle" aria-pressed="true" title="Zijmenu in-/uitklappen">☰ Menu</button>
           <label class="file-picker" for="file-input">
             📄 Kies PDF
             <input id="file-input" type="file" accept="application/pdf" />
@@ -326,25 +459,59 @@
   </header>
 
   <main class="app-shell">
-    <section class="viewer-shell" aria-live="polite">
-      <div class="draw-controls" aria-label="Teken opties">
-        <button class="btn" id="toggle-draw" aria-pressed="false">✏️ Tekenen uit</button>
-        <div aria-label="Kleuren" style="display: flex; gap: 6px; align-items: center;">
-          <button class="color-swatch" data-color="#1a64d9" aria-pressed="true" style="background:#1a64d9"></button>
-          <button class="color-swatch" data-color="#ef4444" aria-pressed="false" style="background:#ef4444"></button>
-          <button class="color-swatch" data-color="#10b981" aria-pressed="false" style="background:#10b981"></button>
-          <button class="color-swatch" data-color="#111827" aria-pressed="false" style="background:#111827"></button>
+    <div class="layout">
+      <aside class="sidebar" id="sidebar" aria-label="Zijmenu">
+        <div class="sidebar-header">
+          <div style="font-weight: 700;">Zijmenu</div>
+          <button class="btn secondary" id="collapse-sidebar" aria-expanded="true">← inklappen</button>
+          <div class="sidebar-resizer" id="sidebar-resizer" aria-hidden="true"></div>
         </div>
-        <label style="display: inline-flex; align-items: center; gap: 6px; color: var(--muted);">
-          Dikte
-          <input type="range" id="stroke-width" min="1" max="12" value="3" class="range" />
-        </label>
-        <button class="btn secondary" id="clear-page" title="Wis tekeningen op pagina">Wissen</button>
-      </div>
-      <div id="viewer" role="document" aria-label="PDF weergave">
-        <div class="empty-state" id="empty-state">Laad een PDF om te bekijken. Tekst selecteren, tekenen en scrollen worden ondersteund.</div>
-      </div>
-    </section>
+        <div class="sidebar-body">
+          <div class="sidebar-section">
+            <div style="font-weight: 600;">Navigatie</div>
+            <div class="page-list" id="page-list" aria-label="Pagina's"></div>
+            <div class="hint">Klik op een pagina om erheen te springen.</div>
+          </div>
+          <div class="sidebar-section">
+            <div style="font-weight: 600;">Tips</div>
+            <ul style="margin: 0; padding-left: 18px; color: var(--muted); font-size: 14px; line-height: 1.4;">
+              <li>Gebruik +/− of ctrl + scroll om in/uit te zoomen.</li>
+              <li>Tekentools zijn geoptimaliseerd voor muis, touch en stylus.</li>
+              <li>Je laatst bezochte pagina wordt onthouden na een refresh.</li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+      <section class="viewer-shell" aria-live="polite">
+        <div class="draw-controls" aria-label="Teken opties">
+          <button class="btn" id="toggle-draw" aria-pressed="false">✏️ Tekenen uit</button>
+          <div class="tool-toggle" role="group" aria-label="Tekentools">
+            <button id="tool-pen" data-tool="pen" aria-pressed="true">🖊️ Pen</button>
+            <button id="tool-marker" data-tool="marker" aria-pressed="false">🖍️ Marker</button>
+            <button id="tool-eraser" data-tool="eraser" aria-pressed="false">🧽 Gum</button>
+          </div>
+          <div aria-label="Kleuren" style="display: flex; gap: 6px; align-items: center;">
+            <button class="color-swatch" data-color="#1a64d9" aria-pressed="true" style="background:#1a64d9"></button>
+            <button class="color-swatch" data-color="#ef4444" aria-pressed="false" style="background:#ef4444"></button>
+            <button class="color-swatch" data-color="#10b981" aria-pressed="false" style="background:#10b981"></button>
+            <button class="color-swatch" data-color="#111827" aria-pressed="false" style="background:#111827"></button>
+          </div>
+          <label style="display: inline-flex; align-items: center; gap: 6px; color: var(--muted);">
+            Dikte
+            <input type="range" id="stroke-width" min="1" max="16" value="3" class="range" />
+          </label>
+          <label style="display: inline-flex; align-items: center; gap: 6px; color: var(--muted);">
+            Dekking
+            <input type="range" id="stroke-opacity" min="30" max="100" value="100" class="range" />
+          </label>
+          <button class="btn secondary" id="undo-stroke" title="Laatste tekening ongedaan maken">↩️ Undo</button>
+          <button class="btn secondary" id="clear-page" title="Wis tekeningen op pagina">Wissen</button>
+        </div>
+        <div id="viewer" role="document" aria-label="PDF weergave">
+          <div class="empty-state" id="empty-state">Laad een PDF om te bekijken. Tekst selecteren, tekenen en scrollen worden ondersteund.</div>
+        </div>
+      </section>
+    </div>
   </main>
 
   <script>
@@ -361,22 +528,34 @@
     const emptyState = document.getElementById('empty-state');
     const toggleDrawBtn = document.getElementById('toggle-draw');
     const strokeWidthInput = document.getElementById('stroke-width');
+    const strokeOpacityInput = document.getElementById('stroke-opacity');
     const clearPageBtn = document.getElementById('clear-page');
+    const undoBtn = document.getElementById('undo-stroke');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebarCollapse = document.getElementById('collapse-sidebar');
+    const sidebarResizer = document.getElementById('sidebar-resizer');
+    const pageList = document.getElementById('page-list');
 
     const DPR = window.devicePixelRatio || 1;
     const MIN_SCALE = 0.75;
-    const MAX_SCALE = 3.5;
+    const MAX_SCALE = 6.5;
+    const STORAGE_KEYS = { lastPage: 'pdf-viewer:lastPage' };
     let pdfDoc = null;
     let currentScale = 1.15;
     let currentPage = 1;
     let observer = null;
     let rendering = false;
+    let sidebarCollapsed = false;
+    let sidebarWidth = 280;
 
     const drawings = new Map();
     const brush = {
       enabled: false,
       color: '#1a64d9',
       size: 3,
+      opacity: 1,
+      tool: 'pen',
     };
 
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.worker.min.js';
@@ -393,7 +572,7 @@
     });
 
     function setButtonsEnabled(enabled) {
-      [prevBtn, nextBtn, zoomInBtn, zoomOutBtn, resetBtn, fitWidthBtn, toggleDrawBtn, clearPageBtn].forEach(btn => {
+      [prevBtn, nextBtn, zoomInBtn, zoomOutBtn, resetBtn, fitWidthBtn, toggleDrawBtn, clearPageBtn, undoBtn].forEach(btn => {
         btn.disabled = !enabled;
       });
     }
@@ -406,11 +585,60 @@
       pageStatus.textContent = `Pagina ${Math.min(currentPage, total)} / ${total}`;
     }
 
+    function persistCurrentPage() {
+      try {
+        localStorage.setItem(STORAGE_KEYS.lastPage, String(currentPage));
+      } catch (error) {
+        console.warn('Kon pagina niet opslaan', error);
+      }
+    }
+
+    function restoreLastPage(totalPages) {
+      let saved = null;
+      try {
+        saved = Number(localStorage.getItem(STORAGE_KEYS.lastPage));
+      } catch (error) {
+        console.warn('Kon opgeslagen pagina niet lezen', error);
+      }
+      if (!saved || Number.isNaN(saved)) return;
+      const target = Math.min(Math.max(1, saved), totalPages);
+      currentPage = target;
+      updatePageStatus(totalPages);
+      scrollToPage(target, { instant: true });
+    }
+
+    function updateSidebarState(collapsed) {
+      sidebarCollapsed = collapsed;
+      sidebar.classList.toggle('collapsed', collapsed);
+      sidebarToggle.setAttribute('aria-pressed', String(!collapsed));
+      sidebarCollapse.setAttribute('aria-expanded', String(!collapsed));
+      sidebar.style.width = collapsed ? '0px' : `${sidebarWidth}px`;
+    }
+
     function getPageDrawing(pageNumber) {
       if (!drawings.has(pageNumber)) {
         drawings.set(pageNumber, { strokes: [] });
       }
       return drawings.get(pageNumber);
+    }
+
+    function populatePageList(total) {
+      pageList.innerHTML = '';
+      for (let i = 1; i <= total; i++) {
+        const button = document.createElement('button');
+        button.className = 'page-chip';
+        button.textContent = `Pg ${i}`;
+        button.dataset.pageNumber = String(i);
+        button.addEventListener('click', () => scrollToPage(i));
+        pageList.appendChild(button);
+      }
+      updateActivePageChip();
+    }
+
+    function updateActivePageChip() {
+      pageList.querySelectorAll('.page-chip').forEach((chip) => {
+        chip.classList.toggle('active', Number(chip.dataset.pageNumber) === currentPage);
+      });
     }
 
     async function loadDocument(data) {
@@ -422,7 +650,8 @@
         viewer.innerHTML = '';
         pdfDoc = await pdfjsLib.getDocument({ data }).promise;
         await renderDocument();
-        attachPageObserver();
+        populatePageList(pdfDoc.numPages);
+        restoreLastPage(pdfDoc.numPages);
         setButtonsEnabled(true);
       } catch (error) {
         console.error(error);
@@ -439,10 +668,13 @@
 
     function drawStroke(ctx, stroke, width, height) {
       if (!stroke.points.length) return;
+      ctx.save();
       ctx.strokeStyle = stroke.color;
       ctx.lineWidth = stroke.size;
       ctx.lineJoin = 'round';
       ctx.lineCap = 'round';
+      ctx.globalAlpha = stroke.opacity ?? 1;
+      ctx.globalCompositeOperation = stroke.mode === 'eraser' ? 'destination-out' : 'source-over';
       ctx.beginPath();
       stroke.points.forEach((point, index) => {
         const x = point.x * width;
@@ -454,6 +686,7 @@
         }
       });
       ctx.stroke();
+      ctx.restore();
     }
 
     function redrawLayer(canvas, pageNumber) {
@@ -479,6 +712,8 @@
       rendering = false;
       updateZoomLabel();
       updatePageStatus(pdfDoc.numPages);
+      updateActivePageChip();
+      attachPageObserver();
     }
 
     async function renderPage(container, pageNumber) {
@@ -536,6 +771,8 @@
           if (entry.isIntersecting) {
             currentPage = Number(entry.target.dataset.pageNumber || 1);
             updatePageStatus(pdfDoc?.numPages ?? 0);
+            updateActivePageChip();
+            persistCurrentPage();
           }
         });
       }, { root: viewer, threshold: 0.65 });
@@ -543,10 +780,16 @@
       document.querySelectorAll('.page').forEach((page) => observer.observe(page));
     }
 
-    function scrollToPage(pageNumber) {
+    function scrollToPage(pageNumber, { instant = false } = {}) {
       const page = document.querySelector(`.page[data-page-number="${pageNumber}"]`);
       if (page) {
-        page.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        page.scrollIntoView({ behavior: instant ? 'auto' : 'smooth', block: 'start' });
+        if (pdfDoc) {
+          currentPage = pageNumber;
+          updatePageStatus(pdfDoc.numPages);
+          updateActivePageChip();
+          persistCurrentPage();
+        }
       }
     }
 
@@ -565,6 +808,23 @@
       brush.color = colorButton.dataset.color;
     }
 
+    function setTool(tool) {
+      brush.tool = tool;
+      document.querySelectorAll('.tool-toggle button').forEach((btn) => {
+        btn.setAttribute('aria-pressed', String(btn.dataset.tool === tool));
+      });
+      if (tool === 'marker' && strokeOpacityInput) {
+        brush.opacity = 0.7;
+        strokeOpacityInput.value = String(Math.round(brush.opacity * 100));
+      }
+      if (tool === 'eraser') {
+        brush.color = '#ffffff';
+      } else {
+        const activeColor = document.querySelector('.color-swatch[aria-pressed="true"]');
+        brush.color = activeColor?.dataset.color || brush.color;
+      }
+    }
+
     function attachDrawingEvents(canvas, pageNumber) {
       const ctx = canvas.getContext('2d');
       let isDrawing = false;
@@ -572,6 +832,7 @@
 
       const width = () => canvas.width / DPR;
       const height = () => canvas.height / DPR;
+      canvas.style.touchAction = 'none';
 
       function pointerToPoint(event) {
         const rect = canvas.getBoundingClientRect();
@@ -583,7 +844,8 @@
       function startDraw(event) {
         if (!brush.enabled) return;
         isDrawing = true;
-        currentStroke = { color: brush.color, size: brush.size, points: [] };
+        const opacity = brush.tool === 'marker' ? brush.opacity * 0.6 : brush.opacity;
+        currentStroke = { color: brush.color, size: brush.size, points: [], opacity, mode: brush.tool };
         canvas.setPointerCapture(event.pointerId);
         addPoint(event);
       }
@@ -596,6 +858,8 @@
         ctx.lineWidth = currentStroke.size;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
+        ctx.globalAlpha = currentStroke.opacity;
+        ctx.globalCompositeOperation = currentStroke.mode === 'eraser' ? 'destination-out' : 'source-over';
         const px = point.x * width();
         const py = point.y * height();
         if (currentStroke.points.length === 1) {
@@ -629,6 +893,16 @@
       if (!pdfDoc) return;
       const { strokes } = getPageDrawing(currentPage);
       strokes.length = 0;
+      const layer = document.querySelector(`.page[data-page-number="${currentPage}"] .drawingLayer`);
+      if (layer) {
+        redrawLayer(layer, currentPage);
+      }
+    }
+
+    function undoStroke() {
+      if (!pdfDoc) return;
+      const { strokes } = getPageDrawing(currentPage);
+      strokes.pop();
       const layer = document.querySelector(`.page[data-page-number="${currentPage}"] .drawingLayer`);
       if (layer) {
         redrawLayer(layer, currentPage);
@@ -678,6 +952,15 @@
       }
     });
 
+    viewer.addEventListener('wheel', (event) => {
+      if (!pdfDoc) return;
+      if (event.ctrlKey) {
+        event.preventDefault();
+        const step = event.deltaY < 0 ? 0.08 : -0.08;
+        changeScale(step);
+      }
+    }, { passive: false });
+
     toggleDrawBtn.addEventListener('click', () => {
       toggleDrawingMode();
     });
@@ -686,11 +969,51 @@
       button.addEventListener('click', () => selectColor(button));
     });
 
+    document.querySelectorAll('.tool-toggle button').forEach((button) => {
+      button.addEventListener('click', () => setTool(button.dataset.tool));
+    });
+
     strokeWidthInput.addEventListener('input', (event) => {
       brush.size = Number(event.target.value);
     });
 
+    strokeOpacityInput.addEventListener('input', (event) => {
+      brush.opacity = Number(event.target.value) / 100;
+    });
+
     clearPageBtn.addEventListener('click', clearCurrentPageDrawings);
+    undoBtn.addEventListener('click', undoStroke);
+
+    sidebarToggle.addEventListener('click', () => updateSidebarState(!sidebarCollapsed));
+    sidebarCollapse.addEventListener('click', () => updateSidebarState(true));
+
+    sidebarResizer.addEventListener('pointerdown', (event) => {
+      if (sidebarCollapsed || event.pointerType !== 'mouse') return;
+      const startX = event.clientX;
+      const startWidth = sidebar.offsetWidth || sidebarWidth;
+      sidebarResizer.setPointerCapture(event.pointerId);
+
+      const onMove = (moveEvent) => {
+        const delta = moveEvent.clientX - startX;
+        const nextWidth = Math.min(520, Math.max(200, startWidth + delta));
+        sidebarWidth = nextWidth;
+        sidebar.style.width = `${nextWidth}px`;
+      };
+
+      const endResize = (endEvent) => {
+        sidebarResizer.releasePointerCapture(endEvent.pointerId);
+        sidebarResizer.removeEventListener('pointermove', onMove);
+        sidebarResizer.removeEventListener('pointerup', endResize);
+        sidebarResizer.removeEventListener('pointercancel', endResize);
+      };
+
+      sidebarResizer.addEventListener('pointermove', onMove);
+      sidebarResizer.addEventListener('pointerup', endResize);
+      sidebarResizer.addEventListener('pointercancel', endResize);
+    });
+
+    updateSidebarState(false);
+    setTool('pen');
 
     updateZoomLabel();
     updatePageStatus();
